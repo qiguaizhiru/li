@@ -1,0 +1,113 @@
+{
+  "mod_info": {
+    "name": "骆歆 (Luo Xin) Custom Player Mod",
+    "version": "1.0.0",
+    "game": "EA SPORTS FC 26",
+    "author": "骆歆",
+    "description": "英雄联盟主持人骆歆的自定义球员mod，让骆歆也能在绿茵场上驰骋！"
+  },
+  "player": {
+    "basic_info": {
+      "name_cn": "骆歆",
+      "name_en": "Luo Xin",
+      "short_name": "L. Xin",
+      "gender": "female",
+      "nationality": "China",
+      "birth_date": "1993-07-15",
+      "height_cm": 168,
+      "weight_kg": 55,
+      "preferred_foot": "right",
+      "weak_foot_stars": 3,
+      "skill_moves_stars": 3,
+      "position_primary": "CAM",
+      "position_secondary": ["CM", "RW"],
+      "jersey_number": 7,
+      "commentary_id": "luoxin_custom"
+    },
+    "appearance": {
+      "face_type": "custom",
+      "face_texture": "assets/face/luoxin_face.png",
+      "hair_style": "long_straight",
+      "hair_color": [30, 20, 15],
+      "skin_tone": 3,
+      "eye_color": "dark_brown",
+      "body_type": "lean",
+      "celebration_id": "heart_hands"
+    },
+    "attributes": {
+      "overall_rating": 82,
+      "pace": {
+        "overall": 80,
+        "acceleration": 83,
+        "sprint_speed": 77
+      },
+      "shooting": {
+        "overall": 75,
+        "positioning": 80,
+        "finishing": 74,
+        "shot_power": 72,
+        "long_shots": 76,
+        "volleys": 70,
+        "penalties": 78
+      },
+      "passing": {
+        "overall": 84,
+        "vision": 88,
+        "crossing": 79,
+        "free_kick_accuracy": 75,
+        "short_passing": 86,
+        "long_passing": 82,
+        "curve": 80
+      },
+      "dribbling": {
+        "overall": 83,
+        "agility": 85,
+        "balance": 82,
+        "reactions": 80,
+        "ball_control": 84,
+        "dribbling": 83,
+        "composure": 86
+      },
+      "defending": {
+        "overall": 45,
+        "interceptions": 50,
+        "heading_accuracy": 40,
+        "def_awareness": 48,
+        "standing_tackle": 42,
+        "sliding_tackle": 38
+      },
+      "physicality": {
+        "overall": 65,
+        "jumping": 62,
+        "stamina": 78,
+        "strength": 55,
+        "aggression": 58
+      }
+    },
+    "playstyle": {
+      "playstyles": [
+        "Incisive Pass",
+        "Tiki Taka",
+        "Technical"
+      ],
+      "playstyles_plus": [
+        "Playmaker"
+      ],
+      "work_rate_attack": "High",
+      "work_rate_defense": "Medium"
+    },
+    "traits": [
+      "Leadership",
+      "Team Player",
+      "Flair",
+      "Outside Foot Shot"
+    ]
+  },
+  "team_assignment": {
+    "mode": "free_agent",
+    "suggested_league": "Chinese Super League",
+    "suggested_team": null,
+    "can_be_signed": true,
+    "contract_type": "player"
+  }
+}

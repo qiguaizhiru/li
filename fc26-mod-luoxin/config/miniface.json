@@ -1,0 +1,14 @@
+{
+  "miniface_config": {
+    "player_id": "luoxin_custom",
+    "miniface_path": "assets/miniface/luoxin_miniface.png",
+    "portrait_path": "assets/portraits/luoxin_portrait.png",
+    "card_design": {
+      "card_type": "special_hero",
+      "card_color_primary": "#C41E3A",
+      "card_color_secondary": "#FFD700",
+      "card_badge": "assets/badges/lol_host_badge.png",
+      "dynamic_image": true
+    }
+  }
+}
