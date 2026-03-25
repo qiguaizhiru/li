@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>韩国女团随机抽取器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.85;
+            margin-bottom: 40px;
+        }
+
+        .display-area {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px 30px;
+            margin-bottom: 30px;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.25);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .display-area:hover { transform: scale(1.02); }
+
+        .label {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .result {
+            font-size: 2.8rem;
+            font-weight: bold;
+            text-shadow: 1px 1px 6px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .result-sub {
+            font-size: 1.1rem;
+            opacity: 0.75;
+            margin-top: 8px;
+        }
+
+        .hint {
+            font-size: 0.95rem;
+            opacity: 0.7;
+            color: #ffe0f0;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        .spinning .result {
+            animation: spin 0.1s linear infinite;
+        }
+
+        .btn {
+            padding: 16px 50px;
+            font-size: 1.3rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #ff6b9d, #c44dff);
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 6px 25px rgba(196, 77, 255, 0.5);
+            transition: all 0.3s;
+            letter-spacing: 2px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(196, 77, 255, 0.7);
+        }
+
+        .btn:active { transform: translateY(0); }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .reset-btn {
+            margin-top: 15px;
+            padding: 10px 30px;
+            font-size: 0.95rem;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 30px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .reset-btn:hover { background: rgba(255,255,255,0.35); }
+
+        .step-indicator {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .step {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transition: all 0.3s;
+        }
+
+        .step.active { background: #fff; transform: scale(1.3); }
+        .step.done { background: #ff6b9d; }
+
+        .confetti {
+            position: fixed;
+            top: -10px;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            animation: fall linear forwards;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        @keyframes fall {
+            to { top: 110vh; transform: rotate(720deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>韩国女团随机抽取器</h1>
+        <p class="subtitle">收录历代韩国女子组合，随机抽取你的命运女团与成员</p>
+
+        <div class="step-indicator">
+            <div class="step active" id="step1"></div>
+            <div class="step" id="step2"></div>
+        </div>
+
+        <div class="display-area" id="displayArea">
+            <p class="hint" id="hintText">点击下方按钮开始抽取女团</p>
+        </div>
+
+        <button class="btn" id="mainBtn" onclick="handleClick()">抽 取</button>
+        <button class="reset-btn" id="resetBtn" onclick="resetAll()">重新开始</button>
+    </div>
+
+    <script>
+    const groups = {
+        // ---- 第一代 (1990s) ----
+        "S.E.S": ["Bada", "Eugene", "Shoo"],
+        "Fin.K.L": ["Lee Hyori", "Ock Joo-hyun", "Lee Jin", "Sung Yu-ri"],
+        "Baby V.O.X": ["Kim E-Z", "Shim Eun-jin", "Yoon Eun-hye", "Lee Hee-jin", "Kan Mi-youn"],
+        "Diva": ["Chae Rina", "Vicky", "Bbabbi"],
+
+        // ---- 第二代 (2000s~2010s 初) ----
+        "少女时代 (SNSD)": ["泰妍 Taeyeon", "Jessica", "Sunny", "Tiffany", "孝渊 Hyoyeon", "秀英 Sooyoung", "允儿 Yoona", "徐贤 Seohyun"],
+        "Wonder Girls": ["闵先艺 Sunye", "誉恩 Yeeun", "宣美 Sunmi", "泫雅 HyunA", "昭熙 Sohee", "惠林 Hyelim", "琳琳 Lim"],
+        "KARA": ["朴奎利 Gyuri", "韩胜妍 Seungyeon", "Nicole", "具荷拉 Hara", "姜知英 Jiyoung", "许英智 Youngji"],
+        "2NE1": ["CL", "Minzy", "Dara", "Park Bom"],
+        "f(x)": ["Victoria", "Amber", "Luna", "Sulli", "Krystal"],
+        "T-ara": ["全宝蓝 Boram", "李居丽 Qri", "朴素妍 Soyeon", "咸恩静 Eunjung", "朴孝敏 Hyomin", "朴智妍 Jiyeon"],
+        "After School": ["Kahi", "Jungah", "Jooyeon", "Bekah", "Uee", "Raina", "Nana", "Lizzy", "E-Young", "Kaeun"],
+        "4Minute": ["南智贤 Jihyun", "泫雅 HyunA", "许嘉允 Gayoon", "全智允 Jiyoon", "权昭贤 Sohyun"],
+        "miss A": ["Fei", "Jia", "Min", "Suzy"],
+        "Secret": ["全孝盛 Hyosung", "郑荷娜 Hana", "宋枝恩 Jieun", "韩善花 Sunhwa"],
+        "Rainbow": ["Woori", "Seungah", "Jaekyung", "No-eul", "Yoonhye", "Jisook", "Hyunyoung"],
+        "Nine Muses": ["Moon Hyuna", "Lee Sem", "Sojin", "Sera", "Euaerin", "Keumjo", "Kyungri", "Hyemi", "Minha", "Sungah"],
+        "Dal Shabet": ["Serri", "Ah Young", "Jiyul", "Subin", "Woohee"],
+        "SISTAR": ["孝琳 Hyolyn", "宝拉 Bora", "昭宥 Soyou", "多顺 Dasom"],
+        "Apink": ["朴初珑 Chorong", "尹普美 Bomi", "郑恩地 Eunji", "孙娜恩 Naeun", "金南珠 Namjoo", "吴夏荣 Hayoung"],
+        "AOA": ["智珉 Jimin", "酉奈 Yuna", "惠晶 Hyejeong", "珉娥 Mina", "雪炫 Seolhyun", "澯美 Chanmi"],
+        "Girl's Day": ["珉雅 Minah", "惠利 Hyeri", "素珍 Sojin", "Yura"],
+        "Stellar": ["Gayoung", "Minhee", "Hyoeun", "Jeonyul"],
+        "EXID": ["率智 Solji", "LE", "哈妮 Hani", "慧潾 Hyelin", "正花 Junghwa"],
+        "Lovelyz": ["Baby Soul", "Jiae", "Jisoo", "Mijoo", "Kei", "Jin", "Sujeong", "Yein"],
+        "MAMAMOO": ["颂乐 Solar", "玟星 Moonbyul", "辉人 Wheein", "华莎 Hwasa"],
+        "Red Velvet": ["Irene", "Seulgi", "Wendy", "Joy", "Yeri"],
+        "Oh My Girl": ["孝定 Hyojung", "苗 Mimi", "YooA", "胜熙 Seunghee", "祉呼 Jiho", "Binnie", "Arin"],
+        "GFRIEND": ["Sowon", "Yerin", "Eunha", "Yuju", "SinB", "Umji"],
+        "DIA": ["Chaeyeon", "Heehyun", "Jenny", "Yebin", "Eunchae", "Eunice", "Somyi", "Jueun"],
+        "宇宙少女 (WJSN)": ["Seola", "Bona", "Exy", "Soobin", "Luda", "Dawon", "Eunseo", "Yeonjung", "Dayoung", "Cheng Xiao", "Mei Qi", "Xuan Yi"],
+        "I.O.I": ["Lim Nayoung", "Kim Sejeong", "Jung Chaeyeon", "Zhou Jieqiong", "Kim Chungha", "Kim Sohye", "Kang Mina", "Kim Doyeon", "Choi Yoojung", "Jeon Somi", "Yu Yunjung"],
+        "gugudan": ["Hana", "Haebin", "Mimi", "Nayoung", "Sejeong", "Sally", "Soyee", "Mina", "Hyeyeon"],
+        "CLC": ["Seunghee", "Yujin", "Seungyeon", "Sorn", "Yeeun", "Elkie", "Eunbin"],
+        "Dreamcatcher": ["JiU", "SuA", "Siyeon", "Handong", "Yoohyeon", "Dami", "Gahyeon"],
+        "Pristin": ["Nayoung", "Roa", "Yuha", "Eunwoo", "Rena", "Kyulkyung", "Yehana", "Sungyeon", "Xiyeon", "Kyla"],
+
+        // ---- 第三代 / 第四代 (2016~) ----
+        "BLACKPINK": ["Jisoo", "Jennie", "Rosé", "Lisa"],
+        "TWICE": ["Nayeon", "Jeongyeon", "Momo", "Sana", "Jihyo", "Mina", "Dahyun", "Chaeyoung", "Tzuyu"],
+        "MOMOLAND": ["Hyebin", "Jane", "Nayun", "JooE", "Ahin", "Nancy"],
+        "fromis_9": ["Saerom", "Hayoung", "Gyuri", "Jiwon", "Jiheon", "Seoyeon", "Chaeyoung", "Nagyung", "Jisun"],
+        "(G)I-DLE": ["Miyeon", "Minnie", "Soyeon", "Yuqi", "Shuhua"],
+        "IZ*ONE": ["Jang Wonyoung", "Miyawaki Sakura", "Jo Yuri", "Choi Yena", "An Yujin", "Nako", "Kwon Eunbi", "Kang Hyewon", "Honda Hitomi", "Kim Chaewon", "Kim Minju", "Lee Chaeyeon"],
+        "ITZY": ["Yeji", "Lia", "Ryujin", "Chaeryeong", "Yuna"],
+        "EVERGLOW": ["E:U", "Sihyeon", "Mia", "Onda", "Aisha", "Yiren"],
+        "Cherry Bullet": ["Haeyoon", "Yuju", "Bora", "Jiwon", "Remi", "Chaerin", "May"],
+        "Rocket Punch": ["Juri", "Yeonhee", "Suyun", "Yunkyoung", "Sohee", "Dahyun"],
+        "STAYC": ["Sumin", "Sieun", "Isa", "Seeun", "Yoon", "J"],
+        "aespa": ["Karina", "Giselle", "Winter", "Ningning"],
+        "IVE": ["Yujin", "Gaeul", "Rei", "Wonyoung", "Liz", "Leeseo"],
+        "Kep1er": ["Yujin", "Xiaoting", "Mashiro", "Chaehyun", "Dayeon", "Hikaru", "Huening Bahiyyih", "Youngeun", "Yeseo"],
+        "LE SSERAFIM": ["Sakura", "Kim Chaewon", "Huh Yunjin", "Kazuha", "Hong Eunchae"],
+        "NewJeans": ["Minji", "Hanni", "Danielle", "Haerin", "Hyein"],
+        "NMIXX": ["Lily", "Haewon", "Sullyoon", "Jinni", "BAE", "Jiwoo", "Kyujin"],
+        "FIFTY FIFTY": ["Aran", "Keena", "Saena", "Sio"],
+        "KISS OF LIFE": ["Julie", "Natty", "Belle", "Haneul"],
+        "BABYMONSTER": ["Ruka", "Pharita", "Asa", "Ahyeon", "Rami", "Rora", "Chiquita"],
+        "tripleS": ["SeoYeon", "HyeRin", "JiWoo", "ChaeYeon", "YooYeon", "SooMin", "NaKyoung", "YuBin", "Kaede", "DaHyun", "Kotone", "YeonJi", "Nien", "ShinYu", "Lynn", "JooBin", "HaYeon", "ShiOn"],
+        "ILLIT": ["Yunah", "Minju", "Moka", "Wonhee", "Iroha"],
+        "UNIS": ["Hyeonju", "Kotoko", "Nana", "Gehlee", "Elisia", "Yoona", "Seowon", "Yunha"],
+        "RESCENE": ["Kuuko", "Doah", "Lovi", "May", "Ziyu", "Minami"],
+        "VVUP": ["Kim", "Paan", "Suyeon", "Puri"],
+        "H1-KEY": ["Hwiseo", "Riina", "Seoi", "Yel"],
+        "Billlie": ["SiYoon", "SuHyeon", "HaRam", "TsukI", "ShiOn", "HaRuNa", "Moon SuA"],
+        "VIVIZ": ["Eunha", "SinB", "Umji"],
+        "Weeekly": ["Monday", "Jihan", "Soeun", "Jaehee", "Zoa"],
+        "bugAboo": ["Choyeon", "Rainie", "Yoona", "Cyan", "Zin", "Eunchae"],
+        "LIGHTSUM": ["Sangah", "Chowon", "Nayoung", "Hina", "Juhyeon", "Yujeong"],
+        "Purple Kiss": ["Park Jieun", "Na Goeun", "Dosie", "Ireh", "Yuki", "Chaein", "Swan"],
+        "PIXY": ["Ella", "Lola", "Satbyeol", "Dia", "Sua", "Dajeong"],
+        "Lapillus": ["Shana", "Chanty", "Yue", "Bessie", "Seowon", "Haeun"],
+        "CLASS:y": ["Myung Hyungseo", "Kim Riwon", "Park Boeun", "Won Jimin", "Hong Hyeju", "Kim Seonyu", "Yoon Chaewon"],
+        "ICHILLIN'": ["Jackie", "Chaerin", "Jiyoon", "E.Ji", "Chowon", "Yeju", "Joonie"],
+        "CSR": ["Geumhee", "Sua", "Yeham", "Sihyeon", "Duna", "Yuna", "Seoyeon"],
+        "mimiirose": ["Yuri", "Jia", "Rei", "Daon", "Yeonji"],
+    };
+
+    let state = 'idle'; // idle -> groupPicked -> memberPicked
+    let selectedGroup = null;
+    let selectedMembers = null;
+
+    const displayArea = document.getElementById('displayArea');
+    const hintText = document.getElementById('hintText');
+    const mainBtn = document.getElementById('mainBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+
+    function handleClick() {
+        if (state === 'idle') {
+            pickGroup();
+        } else if (state === 'groupPicked') {
+            pickMember();
+        }
+    }
+
+    function pickGroup() {
+        mainBtn.disabled = true;
+        const groupNames = Object.keys(groups);
+        let count = 0;
+        const totalSpins = 20;
+        displayArea.classList.add('spinning');
+
+        const interval = setInterval(() => {
+            const rand = groupNames[Math.floor(Math.random() * groupNames.length)];
+            displayArea.innerHTML = `<div class="result">${rand}</div>`;
+            count++;
+            if (count >= totalSpins) {
+                clearInterval(interval);
+                displayArea.classList.remove('spinning');
+                selectedGroup = groupNames[Math.floor(Math.random() * groupNames.length)];
+                selectedMembers = groups[selectedGroup];
+                displayArea.innerHTML = `
+                    <div class="label">女团</div>
+                    <div class="result">${selectedGroup}</div>
+                    <div class="result-sub">共 ${selectedMembers.length} 名成员</div>
+                `;
+                state = 'groupPicked';
+                mainBtn.textContent = '抽取成员';
+                mainBtn.disabled = false;
+                step1.classList.remove('active');
+                step1.classList.add('done');
+                step2.classList.add('active');
+            }
+        }, 80);
+    }
+
+    function pickMember() {
+        mainBtn.disabled = true;
+        let count = 0;
+        const totalSpins = 20;
+        displayArea.classList.add('spinning');
+
+        const interval = setInterval(() => {
+            const rand = selectedMembers[Math.floor(Math.random() * selectedMembers.length)];
+            displayArea.innerHTML = `
+                <div class="label">${selectedGroup}</div>
+                <div class="result">${rand}</div>
+            `;
+            count++;
+            if (count >= totalSpins) {
+                clearInterval(interval);
+                displayArea.classList.remove('spinning');
+                const member = selectedMembers[Math.floor(Math.random() * selectedMembers.length)];
+                displayArea.innerHTML = `
+                    <div class="label">${selectedGroup}</div>
+                    <div class="result">${member}</div>
+                    <div class="result-sub">恭喜你抽到了！</div>
+                `;
+                state = 'memberPicked';
+                mainBtn.style.display = 'none';
+                resetBtn.style.display = 'inline-block';
+                step2.classList.remove('active');
+                step2.classList.add('done');
+                launchConfetti();
+            }
+        }, 80);
+    }
+
+    function resetAll() {
+        state = 'idle';
+        selectedGroup = null;
+        selectedMembers = null;
+        displayArea.innerHTML = '<p class="hint" id="hintText">点击下方按钮开始抽取女团</p>';
+        mainBtn.textContent = '抽 取';
+        mainBtn.style.display = 'inline-block';
+        mainBtn.disabled = false;
+        resetBtn.style.display = 'none';
+        step1.className = 'step active';
+        step2.className = 'step';
+    }
+
+    function launchConfetti() {
+        const colors = ['#ff6b9d', '#c44dff', '#ffdd57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd', '#01a3a4'];
+        for (let i = 0; i < 60; i++) {
+            const el = document.createElement('div');
+            el.className = 'confetti';
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.background = colors[Math.floor(Math.random() * colors.length)];
+            el.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+            el.style.animationDelay = Math.random() * 0.5 + 's';
+            el.style.width = (Math.random() * 8 + 6) + 'px';
+            el.style.height = (Math.random() * 8 + 6) + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 4000);
+        }
+    }
+    </script>
+</body>
+</html>
